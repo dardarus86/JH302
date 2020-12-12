@@ -5,6 +5,8 @@
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
 #include <Components/SkeletalMeshComponent.h>
+#include <Components/WidgetComponent.h>
+#include "Components/WidgetComponent.h"
 #include "Materials/Material.h"
 #include "Enemies.generated.h"
 
@@ -27,5 +29,17 @@ public:
 	
 	UPROPERTY(EditAnywhere)
 	USkeletalMeshComponent* skeletalMesh;
+
+	UFUNCTION(BlueprintCallable)
+	void EnemyTakeDamage(float damage);
+	UFUNCTION(BlueprintCallable)
+	void DestroyEnemyActor();
+
+	UPROPERTY(EditAnywhere,BlueprintReadWrite,Category = "Health")
+	float FullHealth;
+
+	UPROPERTY(EditAnywhere,BlueprintReadWrite,Category = "Health")
+	float currentHealth;
+	
 
 };

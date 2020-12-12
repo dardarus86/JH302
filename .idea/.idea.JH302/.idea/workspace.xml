@@ -5,32 +5,51 @@
     <projectFile>Intermediate/ProjectFiles/UE4.vcxproj</projectFile>
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="a0f6d7f7-fedb-42a7-a6f3-95420f2f21cf" name="Default Changelist" comment="" />
+    <list default="true" id="a0f6d7f7-fedb-42a7-a6f3-95420f2f21cf" name="Default Changelist" comment="">
+      <change beforePath="$PROJECT_DIR$/.idea/.idea.JH302/.idea/contentModel.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/.idea.JH302/.idea/contentModel.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/.idea.JH302/.idea/riderModule.iml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/.idea.JH302/.idea/riderModule.iml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/.idea.JH302/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/.idea.JH302/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Config/DefaultEngine.ini" beforeDir="false" afterPath="$PROJECT_DIR$/Config/DefaultEngine.ini" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Config/DefaultInput.ini" beforeDir="false" afterPath="$PROJECT_DIR$/Config/DefaultInput.ini" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Content/ThirdPersonCPP/Blueprints/ThirdPersonCharacter.uasset" beforeDir="false" afterPath="$PROJECT_DIR$/Content/ThirdPersonCPP/Blueprints/ThirdPersonCharacter.uasset" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Content/ThirdPersonCPP/Maps/ThirdPersonExampleMap.umap" beforeDir="false" afterPath="$PROJECT_DIR$/Content/ThirdPersonCPP/Maps/ThirdPersonExampleMap.umap" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Source/JH302/Enemies.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Source/JH302/Enemies.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Source/JH302/Enemies.h" beforeDir="false" afterPath="$PROJECT_DIR$/Source/JH302/Enemies.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Source/JH302/JH302Character.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Source/JH302/JH302Character.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Source/JH302/JH302Character.h" beforeDir="false" afterPath="$PROJECT_DIR$/Source/JH302/JH302Character.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Source/JH302/MyCylinder.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Source/JH302/MyCylinder.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Source/JH302/MyCylinder.h" beforeDir="false" afterPath="$PROJECT_DIR$/Source/JH302/MyCylinder.h" afterDir="false" />
+    </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
     <option name="LAST_RESOLUTION" value="IGNORE" />
   </component>
+  <component name="Git.Settings">
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
+  </component>
   <component name="HighlightingSettingsPerFile">
-    <setting file="file://F:/games/UE_4.24/Engine/Source/Runtime/Core/Public/GenericPlatform/GenericPlatformString.h" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://F:/games/UE_4.24/Engine/Source/Runtime/Core/Public/Containers/Array.h" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://F:/games/UE_4.24/Engine/Source/Runtime/CoreUObject/Public/UObject/UObjectBaseUtility.h" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://F:/games/UE_4.24/Engine/Source/Runtime/Engine/Classes/GameFramework/Character.h" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://F:/games/UE_4.24/Engine/Source/Runtime/Engine/Classes/GameFramework/Actor.h" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://F:/games/UE_4.24/Engine/Source/Runtime/CoreUObject/Public/UObject/Object.h" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/../../games/UE_4.24/Engine/Source/Runtime/Core/Public/GenericPlatform/GenericPlatformString.h" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/../../games/UE_4.24/Engine/Source/Runtime/Core/Public/Containers/Array.h" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/Intermediate/Build/Win64/UE4Editor/Inc/JH302/GroundPound.generated.h" root0="SKIP_HIGHLIGHTING" />
-    <setting file="file://F:/games/UE_4.24/Engine/Source/Runtime/Engine/Classes/Components/SkeletalMeshComponent.h" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://F:/games/UE_4.24/Engine/Source/Runtime/Core/Public/Logging/LogTrace.h" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/../../games/UE_4.24/Engine/Source/Runtime/CoreUObject/Public/UObject/UObjectBaseUtility.h" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/../../games/UE_4.24/Engine/Source/Runtime/Engine/Classes/GameFramework/Character.h" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/../../games/UE_4.24/Engine/Source/Runtime/Engine/Classes/GameFramework/Actor.h" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/../../games/UE_4.24/Engine/Source/Runtime/CoreUObject/Public/UObject/Object.h" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/../../games/UE_4.24/Engine/Source/Runtime/Engine/Private/Character.cpp" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/../../games/UE_4.24/Engine/Source/Runtime/Engine/Private/Components/CharacterMovementComponent.cpp" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/../../games/UE_4.24/Engine/Source/Runtime/Engine/Classes/Components/SkeletalMeshComponent.h" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/../../games/UE_4.24/Engine/Source/Runtime/Core/Public/Logging/LogTrace.h" root0="FORCE_HIGHLIGHTING" />
   </component>
   <component name="IdeDocumentHistory">
     <changedPaths>
+      <option value="$PROJECT_DIR$/Source/JH302/GroundPound.h" />
+      <option value="$PROJECT_DIR$/Source/JH302/GroundPound.cpp" />
       <option value="$PROJECT_DIR$/Source/JH302/Enemies.cpp" />
       <option value="$PROJECT_DIR$/Source/JH302/Enemies.h" />
-      <option value="$PROJECT_DIR$/Source/JH302/MyCylinder.cpp" />
-      <option value="$PROJECT_DIR$/Source/JH302/GroundPound.h" />
       <option value="$PROJECT_DIR$/Source/JH302/MyCylinder.h" />
+      <option value="$PROJECT_DIR$/Source/JH302/MyCylinder.cpp" />
       <option value="$PROJECT_DIR$/Source/JH302/JH302Character.h" />
-      <option value="$PROJECT_DIR$/Source/JH302/GroundPound.cpp" />
       <option value="$PROJECT_DIR$/Source/JH302/JH302Character.cpp" />
     </changedPaths>
   </component>
@@ -40,11 +59,12 @@
     <option name="showLibraryContents" value="true" />
   </component>
   <component name="PropertiesComponent">
-    <property name="DebuggerViewTab_PTCS_FirstProportionKey" value="0.34994584" />
+    <property name="DebuggerViewTab_PTCS_FirstProportionKey" value="0.3832092" />
     <property name="DebuggerViewTab_PTCS_LastProportionKey" value="0.0" />
     <property name="RunOnceActivity.OpenProjectViewOnStart" value="true" />
     <property name="RunOnceActivity.ShowReadmeOnStart" value="true" />
     <property name="WebServerToolWindowFactoryState" value="false" />
+    <property name="XThreadsFramesViewSplitterKey" value="0.2752613" />
     <property name="restartRequiresConfirmation" value="false" />
   </component>
   <component name="RunManager" selected="C++ Project.JH302">
@@ -271,6 +291,8 @@
       <updated>1607646994570</updated>
       <workItem from="1607647010073" duration="9103000" />
       <workItem from="1607694611222" duration="29981000" />
+      <workItem from="1607746451546" duration="841000" />
+      <workItem from="1607787898407" duration="16323000" />
     </task>
     <servers />
   </component>

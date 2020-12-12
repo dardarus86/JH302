@@ -15,7 +15,7 @@ AMyCylinder::AMyCylinder()
 	staticMeshComponent = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Static Mesh"));
 	staticMeshComponent->SetupAttachment(GetRootComponent());
 	staticMeshComponent->SetCollisionProfileName("Cylinder");
-	scale = FVector(5.0,5.0,5.0);
+	scale = FVector(0.2,0.2,5.0);
 	staticMeshComponent->SetWorldScale3D(scale);
 	
 
@@ -44,8 +44,8 @@ FVector AMyCylinder::GetCylinderScale()
 {
 	return scale;
 }
-void AMyCylinder::SetCylinderScale(float scaleAmount)
+void AMyCylinder::SetCylinderScale(FVector scaleAmount)
 {
-	scale = FVector(scaleAmount);
+	scale = FVector(scaleAmount.X,scaleAmount.Y,scaleAmount.Z);
 }
 

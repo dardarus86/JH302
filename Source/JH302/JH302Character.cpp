@@ -11,6 +11,7 @@
 #include "GameFramework/CharacterMovementComponent.h"
 #include "GameFramework/Controller.h"
 #include "GameFramework/SpringArmComponent.h"
+#include "GeometryCollection/GeometryCollectionSimulationTypes.h"
 
 //////////////////////////////////////////////////////////////////////////
 // AJH302Character
@@ -48,6 +49,21 @@ AJH302Character::AJH302Character()
 	FollowCamera->SetupAttachment(CameraBoom, USpringArmComponent::SocketName); // Attach the camera to the end of the boom and let the boom adjust to match the controller orientation
 	FollowCamera->bUsePawnControlRotation = false; // Camera does not rotate relative to arm
 
+	chargeCollisionMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("collision charge"));
+	chargeCollisionMesh->SetupAttachment(RootComponent);
+	chargeCollisionMesh->SetCollisionProfileName("Charge");
+	UStaticMesh* staticMeshAsset = LoadObject<UStaticMesh>(nullptr, TEXT("StaticMesh'/Game/StarterContent/Shapes/Shape_Cube.Shape_Cube'"));
+	//M_Seethrough.M_Seethrough
+	//UMaterial* materialAsset = LoadObject<UMaterial>(nullptr,TEXT("StaticMesh'/Game/StarterContent/Materials/M_Seethrough.M_Seethrough'"));
+	UMaterial* materialAsset = LoadObject<UMaterial>(nullptr,TEXT("StaticMesh'/Game/StarterContent/Materials/M_invisible_cube.M_invisible_cube'"));
+	chargeCollisionMesh->SetStaticMesh(staticMeshAsset);
+	chargeCollisionMesh->SetMaterial(0,materialAsset);
+	chargeCollisionMesh->SetRelativeLocation(FVector(50,0,-100.0f));
+	chargeCollisionMesh->SetWorldScale3D(FVector(2.0,1.5,1.75));
+	chargeCollisionMesh->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
+	chargeCollisionMesh->SetActive(false);
+	chargeCollisionMesh->SetGenerateOverlapEvents(true);
+	
 	// Note: The skeletal mesh and anim blueprint references on the Mesh component (inherited from Character) 
 	// are set in the derived blueprint asset named MyCharacter (to avoid direct content references in C++)
 }
@@ -63,11 +79,14 @@ void AJH302Character::SetupPlayerInputComponent(class UInputComponent* PlayerInp
 	PlayerInputComponent->BindAction("Jump", IE_Released, this, &ACharacter::StopJumping);
 	PlayerInputComponent->BindAction("Ability1", IE_Released, this, &AJH302Character::F_SpawnCylinder);
 	PlayerInputComponent->BindAction("Ability2", IE_Released, this, &AJH302Character::SpawnCylinderAtSetLocation);
-	PlayerInputComponent->BindAction("Ability3", IE_Released, this, &AJH302Character::F_SpawnSphere);
-	PlayerInputComponent->BindAction("LeftClick", IE_Pressed, this, &AJH302Character::LeftClickSetCylinderBoolFalse);
+	PlayerInputComponent->BindAction("Ability3", IE_Pressed, this, &AJH302Character::CanPlayerCharge);
+	PlayerInputComponent->BindAction("LeftClick", IE_Released, this, &AJH302Character::LeftClickSetCylinderBoolFalse);
 	PlayerInputComponent->BindAction("PlusGravity", IE_Pressed, this, &AJH302Character::IncreasePlayerGravity);
 	PlayerInputComponent->BindAction("MinusGravity", IE_Pressed, this, &AJH302Character::DecreasePlayerGravity);
-
+	PlayerInputComponent->BindAction("LeftClick", IE_Pressed, this, &AJH302Character::SetleftMouseClickBoolTrue);
+	PlayerInputComponent->BindAction("LeftClick", IE_Released, this, &AJH302Character::SetleftMouseClickBoolFalse);
+	PlayerInputComponent->BindAction("MovementIncrease", IE_Pressed, this, &AJH302Character::ChangeMovementPlus);
+	PlayerInputComponent->BindAction("Movementdecrease", IE_Pressed, this, &AJH302Character::ChangeMovementMinus);
 	PlayerInputComponent->BindAxis("MoveForward", this, &AJH302Character::MoveForward);
 	PlayerInputComponent->BindAxis("MoveRight", this, &AJH302Character::MoveRight);
 
@@ -100,6 +119,36 @@ void AJH302Character::Tick(float DeltaTime)
 		GetWorld()->LineTraceSingleByChannel(outHit, startPoint, EndPoint, ECC_Visibility, Parameters);
 		mycylinder->SetActorRelativeLocation(outHit.Location);
 
+	}
+
+	if(b_isCharging)
+	{
+		chargeCollisionMesh->SetActive(true);
+		GetCharacterMovement()->MaxWalkSpeed = 2000.0f;
+		PlayerCharge();
+		
+	}
+	else
+	{
+		chargeCollisionMesh->SetActive(false);
+		GetCharacterMovement()->MaxWalkSpeed = 600.0f;
+	}
+
+	if(b_isLeftMouseDown)
+	{
+		if(CylinderScale >= 7.0f)
+		{
+			CylinderScale = 7.0f;
+		}
+		else
+		{
+			CylinderScale = CylinderScale + 0.04f;
+		}
+		mycylinder->SetActorScale3D(FVector(CylinderScale,CylinderScale,5.0f));
+	}
+	else
+	{
+		CylinderScale = 0.2f;
 	}
 
 	//if character is on the ground, you CANT ground pound
@@ -152,7 +201,6 @@ void AJH302Character::F_SpawnSphere()
 
 }
 
-
 void AJH302Character::SpawnCylinderAtSetLocation()
 {
 	FVector DefaultLocation = FVector(-10.0, 850.0, 350.0);
@@ -165,13 +213,14 @@ void AJH302Character::SpawnCylinderAtSetLocation()
 
 void AJH302Character::LeftClickSetCylinderBoolFalse()
 {
-	FVector Velocity(FMath::RandRange(-2000,2000),FMath::RandRange(-2000,2000),FMath::RandRange(50,2000));
+	FVector Velocity(FMath::RandRange(-10.0f * CylinderScale,10.0f* CylinderScale),FMath::RandRange(-10.0f * CylinderScale,10.0f* CylinderScale),FMath::RandRange(100.0f * CylinderScale,1000.0f* CylinderScale));
 	b_Ability_1_Pressed = false;
 int testNumber = 0;
 	mycylinder->GetOverlappingActors(enemiesInOverlapEvent);
 	
 	for(auto &x:enemiesInOverlapEvent)
 	{
+	
 		UPrimitiveComponent* SM = Cast<UPrimitiveComponent>(x->GetRootComponent());
 		//UStaticMeshComponent* SM = Cast<UStaticMeshComponent>(x->GetRootComponent());
 		if(SM)
@@ -186,6 +235,9 @@ int testNumber = 0;
 				SM->AddImpulse(Velocity*SM->GetMass());
 				SM->SetPhysicsLinearVelocity(Velocity,false,NAME_None);
 		}
+		AEnemies* enemy = Cast<AEnemies>(x);
+		enemy->EnemyTakeDamage(15*CylinderScale);
+
 	}
 	mycylinder->Destroy();
 }
@@ -203,10 +255,7 @@ void AJH302Character::DecreasePlayerGravity()
 void AJH302Character::GroundPound()
 {
 	F_SpawnSphere();
-	FVector Velocity(FMath::RandRange(-2000,2000),FMath::RandRange(-2000,2000),FMath::RandRange(50,2000));
-	FVector Location(140,410,130);
 	groundPoundSphere->GetOverlappingActors(enemiesInGroundPoundOverlapEvent);
-	int testCount =0;
 	for(auto &x:enemiesInGroundPoundOverlapEvent)
 	{
 		UPrimitiveComponent* SM = Cast<UPrimitiveComponent>(x->GetRootComponent());
@@ -218,16 +267,73 @@ void AJH302Character::GroundPound()
 			SM->SetCollisionProfileName("PhysicsActor");
 			SM->SetSimulatePhysics(true);
 			SM->SetGenerateOverlapEvents(true);
-			// SM->AddForce(Velocity);
-			// SM->AddImpulseAtLocation(Velocity,SM->GetComponentLocation(),NAME_All);
-			// SM->AddImpulse(Velocity*SM->GetMass());
-			SM->AddRadialForce(this->GetActorLocation(),40000,600000,ERadialImpulseFalloff::RIF_Linear,true);
-			testCount++;
-		}
+			SM->AddRadialForce(this->GetActorLocation(),80000,300000,ERadialImpulseFalloff::RIF_Linear,true);
+			}
+		AEnemies* enemy = Cast<AEnemies>(x);
+		enemy->EnemyTakeDamage(70);
 	}
-	UE_LOG(LogTemp, Warning, TEXT("Text, %d"), testCount );
 	groundPoundSphere->Destroy();
 	canGroundPound = false;
+}
+
+void AJH302Character::SetleftMouseClickBoolTrue()
+{
+	if(!b_isLeftMouseDown)
+	{
+		b_isLeftMouseDown = true;
+	}
+}
+
+void AJH302Character::SetleftMouseClickBoolFalse()
+{
+	if(b_isLeftMouseDown)
+	{
+		b_isLeftMouseDown = false;
+		mycylinder->SetActorScale3D(FVector(0.2,0.2,5.0f));
+	}
+}
+
+void AJH302Character::ChangeMovementPlus()
+{
+	GetCharacterMovement()->MaxWalkSpeed = 40000.0f;
+}
+
+void AJH302Character::ChangeMovementMinus()
+{
+	GetCharacterMovement()->MaxWalkSpeed = 600.0f;
+}
+
+void AJH302Character::PlayerCharge()
+{
+		FVector Velocity(FMath::RandRange(GetCharacterMovement()->GetCurrentAcceleration().X/8,GetCharacterMovement()->GetCurrentAcceleration().X/2),FMath::RandRange( GetCharacterMovement()->GetCurrentAcceleration().Y/8,GetCharacterMovement()->GetCurrentAcceleration().Y/2),FMath::RandRange(100.0f,1000.0f));
+		chargeCollisionMesh->GetOverlappingActors(enemiesInChargeOverlap);
+
+	if(enemiesInChargeOverlap.Num() >= 2)
+	{
+		for(auto &x:enemiesInChargeOverlap)
+		{
+			UPrimitiveComponent* SM = Cast<UPrimitiveComponent>(x->GetRootComponent());
+			if(SM)
+			{
+				SM->SetSimulatePhysics(true);
+				SM->CreatePhysicsState();
+				SM->SetCollisionProfileName("PhysicsActor");
+				SM->SetSimulatePhysics(true);
+				SM->SetGenerateOverlapEvents(true);
+				SM->AddForce(Velocity);
+				SM->AddImpulseAtLocation(Velocity,SM->GetComponentLocation(),NAME_All);
+				SM->AddImpulse(Velocity*SM->GetMass());
+				SM->SetPhysicsLinearVelocity(Velocity,false,NAME_None);
+			}
+			AEnemies* enemy = Cast<AEnemies>(x);
+			//enemy->EnemyTakeDamage(15);
+		}
+	}
+}
+
+void AJH302Character::CanPlayerCharge()
+{
+	b_isCharging = !b_isCharging;
 }
 
 #pragma endregion 

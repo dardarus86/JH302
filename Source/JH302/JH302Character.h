@@ -40,24 +40,46 @@ public:
 protected:
 
 #pragma region project bools
+	
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = CylinderPlacement)
+	bool b_Can_Cylinder_move_Until_Left_Click = false;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = AbilityBools)
+	bool b_Ability_1_Pressed = false;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = AbilityBools)
+	bool canGroundPound = false;
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = AbilityBools)
+    bool b_isLeftMouseDown;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = AbilityBools)
+	bool b_isCharging = false;
+#pragma endregion
+
+#pragma region project variables
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = LineTrace)
 	float m_targettable_Range = 2000;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = CylinderPlacement)
-	float b_Can_Cylinder_move_Until_Left_Click = false;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = AbilityBools)
-	float b_Ability_1_Pressed = false;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = AbilityBools)
-	float canGroundPound = false;
-#pragma endregion 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Cylindervariable)
+	FVector CylinderScaleVector;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Cylindervariable)
+	float CylinderScale = 0.2;
+#pragma endregion
+	
 #pragma region project functions
 	void SpawnCylinderAtSetLocation() ;
 	void LeftClickSetCylinderBoolFalse();
 	void IncreasePlayerGravity();
 	void DecreasePlayerGravity();
 	void GroundPound();
+	void SetleftMouseClickBoolTrue();
+	void SetleftMouseClickBoolFalse();
+	void ChangeMovementPlus();
+	void ChangeMovementMinus();
+	void PlayerCharge();
+	void CanPlayerCharge();
 #pragma endregion 
 
 #pragma region Base functions
@@ -102,6 +124,8 @@ public:
 	FORCEINLINE class USpringArmComponent* GetCameraBoom() const { return CameraBoom; }
 	/** Returns FollowCamera subobject **/
 	FORCEINLINE class UCameraComponent* GetFollowCamera() const { return FollowCamera; }
+
+	UStaticMeshComponent* chargeCollisionMesh;
 #pragma endregion 
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Linetrace)
@@ -132,5 +156,7 @@ public:
 	TArray<AActor*> enemiesInOverlapEvent;
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Enemies)
 	TArray<AActor*> enemiesInGroundPoundOverlapEvent;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Enemies)
+	TArray<AActor*> enemiesInChargeOverlap;
 };
 

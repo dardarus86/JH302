@@ -30,7 +30,7 @@ public:
 	UFUNCTION(BlueprintCallable)
 	FVector GetCylinderScale();
 	UFUNCTION(BlueprintCallable)
-	void SetCylinderScale(float scaleAmount);
+	void SetCylinderScale(FVector scaleAmount);
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	UStaticMeshComponent* staticMeshComponent;

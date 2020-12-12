@@ -5,6 +5,7 @@
 
 
 #include "Engine/EngineTypes.h"
+#include "Internationalization/Text.h"
 #include "Serialization/StructuredArchiveFormatter.h"
 
 // Sets default values
@@ -12,6 +13,9 @@ AEnemies::AEnemies()
 {
  	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
+
+	FullHealth = 100;
+	currentHealth = FullHealth;
 	
 	skeletalMesh = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("SkeletalMesh"));
 	skeletalMesh->SetupAttachment(RootComponent);
@@ -43,5 +47,20 @@ void AEnemies::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
+}
+
+void AEnemies::EnemyTakeDamage(float damage)
+{
+	currentHealth -= damage;
+
+	if( currentHealth <= 0)
+	{
+		DestroyEnemyActor();
+	}
+}
+
+void AEnemies::DestroyEnemyActor()
+{
+	this->Destroy();
 }
 
