@@ -1,0 +1,15 @@
+"LightMappedGeneric" {
+    "$basetexture" "nikl/earth/lava"
+    "$surfaceprop" "rock"
+    "$selfillum" 1
+
+    Proxies
+    {
+        TextureScroll
+            {
+                texturescrollvar $Basetexturetransform
+                texturescrollrate .1
+                texturescrollangle 180
+            }
+    }
+}

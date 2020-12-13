@@ -41,10 +41,6 @@ protected:
 
 #pragma region project bools
 	
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = CylinderPlacement)
-	bool b_Can_Cylinder_move_Until_Left_Click = false;
-
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = AbilityBools)
 	bool b_Ability_1_Pressed = false;
 
@@ -56,32 +52,82 @@ protected:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = AbilityBools)
 	bool b_isCharging = false;
-#pragma endregion
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = AbilityBools)
+	bool b_isGroundPounding = false;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = AbilityBools)
+	bool b_isCastingLightning = false;
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = AbilityBools)
+	bool b_isRightMouseDown = false;
+#pragma endregion
 #pragma region project variables
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = LineTrace)
 	float m_targettable_Range = 2000;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Cylindervariable)
-	FVector CylinderScaleVector;
+	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Cylindervariable)
 	float CylinderScale = 0.2;
-#pragma endregion
 	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Cylindervariable)
+	float timeScale = 1.0;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = GroundPound)
+	float playerDistanceFromGround;
+	
+#pragma endregion
 #pragma region project functions
-	void SpawnCylinderAtSetLocation() ;
-	void LeftClickSetCylinderBoolFalse();
-	void IncreasePlayerGravity();
-	void DecreasePlayerGravity();
+	UFUNCTION(BlueprintCallable)
+	void LightningBlast();
+	UFUNCTION(BlueprintCallable)
+	void GroundPoundPlayerGravityIncrease();
+	UFUNCTION(BlueprintCallable)
 	void GroundPound();
+	UFUNCTION(BlueprintCallable)
 	void SetleftMouseClickBoolTrue();
+	UFUNCTION(BlueprintCallable)
 	void SetleftMouseClickBoolFalse();
-	void ChangeMovementPlus();
-	void ChangeMovementMinus();
+	UFUNCTION(BlueprintCallable)
 	void PlayerCharge();
+	UFUNCTION(BlueprintCallable)
 	void CanPlayerCharge();
-#pragma endregion 
+	UFUNCTION(BlueprintCallable)
+	void CanChangeGlobalTimeDilation();
+	UFUNCTION(BlueprintCallable)
+	void CheckIfRightMouseDownAndTimeDilate();
+	UFUNCTION(BlueprintCallable)
+	void CheckIfChargingAndSetWalkSpeed();
+	UFUNCTION(BlueprintCallable)
+	void CheckLeftMouseDownAndReScaleCylinder();
+	UFUNCTION(BlueprintCallable)
+	void CheckIfCanGroundPoundAndDoIfTrue();
+	UFUNCTION(BlueprintCallable)
+	void UpdateCylinderPosition();
+	UFUNCTION(BlueprintCallable)
+        FVector GetoutHitLineTrace();
+	UFUNCTION(BlueprintCallable)
+        void F_SpawnCylinder();
+	UFUNCTION(BlueprintCallable)
+        void F_SpawnSphere();
+#pragma endregion
+#pragma region project properties
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Linetrace)
+	FHitResult outHit;
+	
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Cylinder)
+	AMyCylinder* mycylinder;
 
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = GroundPound)
+	AGroundPound* groundPoundSphere;
+	
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Enemies)
+	TArray<AActor*> enemiesInOverlapEvent;
+	
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Enemies)
+	TArray<AActor*> enemiesInGroundPoundOverlapEvent;
+	
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Enemies)
+	TArray<AActor*> enemiesInChargeOverlap;
+#pragma endregion 
 #pragma region Base functions
 	/** Resets HMD orientation in VR. */
 	void OnResetVR();
@@ -113,6 +159,7 @@ protected:
 protected:
 	// APawn interface
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
+
 	// End of APawn interface
 #pragma endregion
 
@@ -125,38 +172,18 @@ public:
 	/** Returns FollowCamera subobject **/
 	FORCEINLINE class UCameraComponent* GetFollowCamera() const { return FollowCamera; }
 
+	
+	UPROPERTY(EditAnywhere)
 	UStaticMeshComponent* chargeCollisionMesh;
+
+	UPROPERTY(EditAnywhere)
+	UParticleSystem* particleGroundPound;
+	UPROPERTY(EditAnywhere)
+	UParticleSystem* particleCylinder;
+	UPROPERTY(EditAnywhere)
+	UParticleSystem* particleCharge;
+	
+	TSubclassOf<class UParticleSystem> Particle;
 #pragma endregion 
-
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Linetrace)
-	FHitResult outHit;
-	
-	UFUNCTION(BlueprintCallable)
-        FVector GetoutHitLineTrace();
-
-	UFUNCTION(BlueprintCallable)
-        void F_SpawnCylinder();
-
-	UFUNCTION(BlueprintCallable)
-        void F_SpawnSphere();
-
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Cylinder)
-	TSubclassOf<AMyCylinder> subClasscylinder;
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Cylinder)
-	AMyCylinder* mycylinder;
-	
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = GroundPound)
-	TSubclassOf<AGroundPound> subClassgroundPoundSphere;
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = GroundPound)
-	AGroundPound* groundPoundSphere;
-	
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Enemies)
-	TArray<AEnemies*> enemyArray;
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Enemies)
-	TArray<AActor*> enemiesInOverlapEvent;
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Enemies)
-	TArray<AActor*> enemiesInGroundPoundOverlapEvent;
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Enemies)
-	TArray<AActor*> enemiesInChargeOverlap;
 };
 

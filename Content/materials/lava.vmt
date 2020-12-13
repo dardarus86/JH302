@@ -1,0 +1,14 @@
+"WorldVertexTransition" {
+    "$basetexture" "nikl/earth/lava_stones"
+    "$bumpmap" "nikl/earth/lava_stones_ssbump"
+    "$ssbump" 1
+    "$selfillum" 1
+    "$surfaceprop" "boulder"
+
+    "$basetexture2" "nikl/earth/lava"
+    "$surfaceprop2" "boulder"
+    "$selfillum2" 1
+
+
+    "$blendmodulatetexture" "nikl/earth/lava_blend"
+}

@@ -6,6 +6,7 @@
 
 #include "Engine/EngineTypes.h"
 #include "Internationalization/Text.h"
+#include "Kismet/GameplayStatics.h"
 #include "Serialization/StructuredArchiveFormatter.h"
 
 // Sets default values
@@ -20,7 +21,7 @@ AEnemies::AEnemies()
 	skeletalMesh = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("SkeletalMesh"));
 	skeletalMesh->SetupAttachment(RootComponent);
 	skeletalMesh->SetCollisionProfileName("PhysicsActor");
-	skeletalMesh->SetSimulatePhysics(true);
+	skeletalMesh->SetSimulatePhysics(false);
 	skeletalMesh->SetGenerateOverlapEvents(true);
 	skeletalMesh->SetMobility(EComponentMobility::Movable);
 
@@ -55,6 +56,7 @@ void AEnemies::EnemyTakeDamage(float damage)
 
 	if( currentHealth <= 0)
 	{
+		UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), DeathEffect, GetActorLocation() -FVector(0,0,-20), FRotator::ZeroRotator, true);
 		DestroyEnemyActor();
 	}
 }

@@ -30,6 +30,9 @@ public:
 	UPROPERTY(EditAnywhere)
 	USkeletalMeshComponent* skeletalMesh;
 
+	UPROPERTY(EditAnywhere)
+	UParticleSystem* DeathEffect;
+
 	UFUNCTION(BlueprintCallable)
 	void EnemyTakeDamage(float damage);
 	UFUNCTION(BlueprintCallable)

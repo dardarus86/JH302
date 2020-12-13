@@ -20,7 +20,7 @@ AMyCylinder::AMyCylinder()
 	
 
 	UStaticMesh* staticMeshAsset = LoadObject<UStaticMesh>(nullptr, TEXT("StaticMesh'/Game/StarterContent/Shapes/Shape_Cylinder.Shape_Cylinder'"));
-	UMaterial* materialAsset = LoadObject<UMaterial>(nullptr,TEXT("StaticMesh'/Game/StarterContent/Materials/M_Seethrough.M_Seethrough'"));
+	UMaterial* materialAsset = LoadObject<UMaterial>(nullptr,TEXT("StaticMesh'/Game/materials/cylinder.cylinder'"));
 	staticMeshComponent->SetStaticMesh(staticMeshAsset);
 	staticMeshComponent->SetMaterial(0,materialAsset);
 

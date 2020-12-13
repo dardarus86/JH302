@@ -2,8 +2,6 @@
 
 #include "JH302Character.h"
 
-#include <array>
-
 #include "HeadMountedDisplayFunctionLibrary.h"
 #include "Camera/CameraComponent.h"
 #include "Components/CapsuleComponent.h"
@@ -11,7 +9,8 @@
 #include "GameFramework/CharacterMovementComponent.h"
 #include "GameFramework/Controller.h"
 #include "GameFramework/SpringArmComponent.h"
-#include "GeometryCollection/GeometryCollectionSimulationTypes.h"
+#include "Kismet/GameplayStatics.h"
+#include "Particles/ParticleSystemComponent.h"
 
 //////////////////////////////////////////////////////////////////////////
 // AJH302Character
@@ -35,8 +34,8 @@ AJH302Character::AJH302Character()
 	// Configure character movement
 	GetCharacterMovement()->bOrientRotationToMovement = true; // Character moves in the direction of input...	
 	GetCharacterMovement()->RotationRate = FRotator(0.0f, 540.0f, 0.0f); // ...at this rotation rate
-	GetCharacterMovement()->JumpZVelocity = 2000.f;
-	GetCharacterMovement()->AirControl = 0.2f;
+	GetCharacterMovement()->JumpZVelocity = 500.f;
+	GetCharacterMovement()->AirControl = 1.0f;
 
 	// Create a camera boom (pulls in towards the player if there is a collision)
 	CameraBoom = CreateDefaultSubobject<USpringArmComponent>(TEXT("CameraBoom"));
@@ -63,7 +62,7 @@ AJH302Character::AJH302Character()
 	chargeCollisionMesh->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
 	chargeCollisionMesh->SetActive(false);
 	chargeCollisionMesh->SetGenerateOverlapEvents(true);
-	
+
 	// Note: The skeletal mesh and anim blueprint references on the Mesh component (inherited from Character) 
 	// are set in the derived blueprint asset named MyCharacter (to avoid direct content references in C++)
 }
@@ -78,15 +77,13 @@ void AJH302Character::SetupPlayerInputComponent(class UInputComponent* PlayerInp
 	PlayerInputComponent->BindAction("Jump", IE_Pressed, this, &ACharacter::Jump);
 	PlayerInputComponent->BindAction("Jump", IE_Released, this, &ACharacter::StopJumping);
 	PlayerInputComponent->BindAction("Ability1", IE_Released, this, &AJH302Character::F_SpawnCylinder);
-	PlayerInputComponent->BindAction("Ability2", IE_Released, this, &AJH302Character::SpawnCylinderAtSetLocation);
+	PlayerInputComponent->BindAction("Ability2", IE_Released, this, &AJH302Character::GroundPoundPlayerGravityIncrease);
 	PlayerInputComponent->BindAction("Ability3", IE_Pressed, this, &AJH302Character::CanPlayerCharge);
-	PlayerInputComponent->BindAction("LeftClick", IE_Released, this, &AJH302Character::LeftClickSetCylinderBoolFalse);
-	PlayerInputComponent->BindAction("PlusGravity", IE_Pressed, this, &AJH302Character::IncreasePlayerGravity);
-	PlayerInputComponent->BindAction("MinusGravity", IE_Pressed, this, &AJH302Character::DecreasePlayerGravity);
+	PlayerInputComponent->BindAction("LeftClick", IE_Released, this, &AJH302Character::LightningBlast);
 	PlayerInputComponent->BindAction("LeftClick", IE_Pressed, this, &AJH302Character::SetleftMouseClickBoolTrue);
 	PlayerInputComponent->BindAction("LeftClick", IE_Released, this, &AJH302Character::SetleftMouseClickBoolFalse);
-	PlayerInputComponent->BindAction("MovementIncrease", IE_Pressed, this, &AJH302Character::ChangeMovementPlus);
-	PlayerInputComponent->BindAction("Movementdecrease", IE_Pressed, this, &AJH302Character::ChangeMovementMinus);
+	PlayerInputComponent->BindAction("RightClick", IE_Pressed, this, &AJH302Character::CanChangeGlobalTimeDilation);
+	PlayerInputComponent->BindAction("RightClick", IE_Released, this, &AJH302Character::CanChangeGlobalTimeDilation);
 	PlayerInputComponent->BindAxis("MoveForward", this, &AJH302Character::MoveForward);
 	PlayerInputComponent->BindAxis("MoveRight", this, &AJH302Character::MoveRight);
 
@@ -106,21 +103,32 @@ void AJH302Character::SetupPlayerInputComponent(class UInputComponent* PlayerInp
 	PlayerInputComponent->BindAction("ResetVR", IE_Pressed, this, &AJH302Character::OnResetVR);
 }
 
-void AJH302Character::Tick(float DeltaTime)
+#pragma region Tick functions
+void AJH302Character::CheckIfRightMouseDownAndTimeDilate()
 {
-	Super::Tick(DeltaTime);
-
-	if (b_Ability_1_Pressed)
+	if(b_isRightMouseDown)
 	{
-		FVector startPoint = FollowCamera->GetComponentLocation();
-		FVector EndPoint = (FollowCamera->GetForwardVector() * m_targettable_Range) + startPoint;
-
-		FCollisionQueryParams Parameters;
-		GetWorld()->LineTraceSingleByChannel(outHit, startPoint, EndPoint, ECC_Visibility, Parameters);
-		mycylinder->SetActorRelativeLocation(outHit.Location);
-
+		timeScale = timeScale -0.02;
+		if(timeScale<= 0.2)
+		{
+			timeScale = 0.2;
+		}
+		UGameplayStatics::SetGlobalTimeDilation(GetWorld(),timeScale);
 	}
 
+	if(!b_isRightMouseDown)
+	{
+		timeScale = timeScale + 0.02;
+		if(timeScale >= 1.0)
+		{
+			timeScale = 1.0;
+		}
+		UGameplayStatics::SetGlobalTimeDilation(GetWorld(),timeScale);
+	}
+}
+
+void AJH302Character::CheckIfChargingAndSetWalkSpeed()
+{
 	if(b_isCharging)
 	{
 		chargeCollisionMesh->SetActive(true);
@@ -133,9 +141,13 @@ void AJH302Character::Tick(float DeltaTime)
 		chargeCollisionMesh->SetActive(false);
 		GetCharacterMovement()->MaxWalkSpeed = 600.0f;
 	}
+}
 
+void AJH302Character::CheckLeftMouseDownAndReScaleCylinder()
+{
 	if(b_isLeftMouseDown)
 	{
+		b_isCastingLightning = true;
 		if(CylinderScale >= 7.0f)
 		{
 			CylinderScale = 7.0f;
@@ -150,8 +162,10 @@ void AJH302Character::Tick(float DeltaTime)
 	{
 		CylinderScale = 0.2f;
 	}
+}
 
-	//if character is on the ground, you CANT ground pound
+void AJH302Character::CheckIfCanGroundPoundAndDoIfTrue()
+{
 	if(GetCharacterMovement()->IsMovingOnGround())
 	{
 		GetCharacterMovement()->GravityScale = 1.0f;
@@ -160,13 +174,43 @@ void AJH302Character::Tick(float DeltaTime)
 	else //if not on ground then you CAN ground pound
 	{
 
-			canGroundPound = true;
+		canGroundPound = true;
 	}
 
 	if(canGroundPound && GetCharacterMovement()->IsMovingOnGround())
 	{
 		GroundPound();
 	}
+}
+
+void AJH302Character::UpdateCylinderPosition()
+{
+	if (b_Ability_1_Pressed)
+	{
+		FVector startPoint = FollowCamera->GetComponentLocation();
+		FVector EndPoint = (FollowCamera->GetForwardVector() * m_targettable_Range) + startPoint;
+
+		FCollisionQueryParams Parameters;
+		GetWorld()->LineTraceSingleByChannel(outHit, startPoint, EndPoint, ECC_Visibility, Parameters);
+		mycylinder->SetActorRelativeLocation(outHit.Location);
+
+	}
+}
+#pragma endregion 
+
+void AJH302Character::Tick(float DeltaTime)
+{
+	Super::Tick(DeltaTime);
+
+	UpdateCylinderPosition();
+
+	CheckIfRightMouseDownAndTimeDilate();
+
+	CheckIfChargingAndSetWalkSpeed();
+
+	CheckLeftMouseDownAndReScaleCylinder();
+
+	CheckIfCanGroundPoundAndDoIfTrue();
 }
 
 #pragma region Player made functions
@@ -181,6 +225,7 @@ FVector AJH302Character::GetoutHitLineTrace()
 	return outHit.Location;
 }
 
+//Ability 1 initial function
 void AJH302Character::F_SpawnCylinder()
 {
 	b_Ability_1_Pressed = true;
@@ -189,7 +234,22 @@ void AJH302Character::F_SpawnCylinder()
 	FActorSpawnParameters SpawnParameters;
 	mycylinder = static_cast<AMyCylinder*>(GetWorld()->SpawnActor<AMyCylinder>(GetoutHitLineTrace(), spawnRotation, SpawnParameters));
 }
+//gravity set for ability 2
+void AJH302Character::GroundPoundPlayerGravityIncrease()
+{
+	b_isGroundPounding = true;
 
+	FVector startPoint = GetActorLocation();
+	FVector EndPoint = (GetActorLocation().DownVector * m_targettable_Range) + startPoint;
+
+	FCollisionQueryParams Parameters;
+	GetWorld()->LineTraceSingleByChannel(outHit, startPoint, EndPoint, ECC_Visibility, Parameters);
+
+	playerDistanceFromGround = GetActorLocation().Z - outHit.Location.Z;
+	
+	GetCharacterMovement()->GravityScale = 1000.0f;
+}
+//used in GroundPound()
 void AJH302Character::F_SpawnSphere()
 {
 	FVector DefaultLocation = FVector(-50.0, 850.0, 350.0);
@@ -200,62 +260,53 @@ void AJH302Character::F_SpawnSphere()
 	groundPoundSphere = static_cast<AGroundPound*>(GetWorld()->SpawnActor<AGroundPound>(GetActorLocation()-offset, spawnRotation, SpawnParameters));
 
 }
-
-void AJH302Character::SpawnCylinderAtSetLocation()
+//Ability 1 main functionality
+void AJH302Character::LightningBlast()
 {
-	FVector DefaultLocation = FVector(-10.0, 850.0, 350.0);
-	FRotator spawnRotation(0.0f, 0.0f, 0.0f);
-	FActorSpawnParameters SpawnParameters;
-
-	GetWorld()->SpawnActor<AMyCylinder>(subClasscylinder, DefaultLocation, spawnRotation, SpawnParameters);
-}
-
-
-void AJH302Character::LeftClickSetCylinderBoolFalse()
-{
-	FVector Velocity(FMath::RandRange(-10.0f * CylinderScale,10.0f* CylinderScale),FMath::RandRange(-10.0f * CylinderScale,10.0f* CylinderScale),FMath::RandRange(100.0f * CylinderScale,1000.0f* CylinderScale));
+	FVector Velocity(FMath::RandRange(-10.0f * CylinderScale,10.0f* CylinderScale),FMath::RandRange(-10.0f * CylinderScale,10.0f* CylinderScale),FMath::RandRange(60.0f * CylinderScale,400.0f* CylinderScale));
 	b_Ability_1_Pressed = false;
-int testNumber = 0;
+
 	mycylinder->GetOverlappingActors(enemiesInOverlapEvent);
+	if(b_isCastingLightning && !b_Ability_1_Pressed)
+	{
+		UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), particleCylinder, GetoutHitLineTrace() -FVector(0,0,+20), FRotator::ZeroRotator, true);
+	}
 	
 	for(auto &x:enemiesInOverlapEvent)
 	{
 	
-		UPrimitiveComponent* SM = Cast<UPrimitiveComponent>(x->GetRootComponent());
-		//UStaticMeshComponent* SM = Cast<UStaticMeshComponent>(x->GetRootComponent());
-		if(SM)
+		UPrimitiveComponent* PC = Cast<UPrimitiveComponent>(x->GetRootComponent());
+
+		if(PC)
 		{
-				SM->SetSimulatePhysics(true);
-				SM->CreatePhysicsState();
-				SM->SetCollisionProfileName("PhysicsActor");
-				SM->SetSimulatePhysics(true);
-				SM->SetGenerateOverlapEvents(true);
-				SM->AddForce(Velocity);
-				SM->AddImpulseAtLocation(Velocity,SM->GetComponentLocation(),NAME_All);
-				SM->AddImpulse(Velocity*SM->GetMass());
-				SM->SetPhysicsLinearVelocity(Velocity,false,NAME_None);
+				PC->SetSimulatePhysics(true);
+				PC->CreatePhysicsState();
+				PC->SetCollisionProfileName("PhysicsActor");
+				PC->SetSimulatePhysics(true);
+				PC->SetGenerateOverlapEvents(true);
+				PC->AddForce(Velocity);
+				PC->AddImpulseAtLocation(Velocity,PC->GetComponentLocation(),NAME_All);
+				PC->AddImpulse(Velocity*PC->GetMass());
+				PC->SetPhysicsLinearVelocity(Velocity,false,NAME_None);
 		}
 		AEnemies* enemy = Cast<AEnemies>(x);
 		enemy->EnemyTakeDamage(15*CylinderScale);
 
 	}
 	mycylinder->Destroy();
+	b_isCastingLightning = false;
 }
-
-void AJH302Character::IncreasePlayerGravity()
-{
-	GetCharacterMovement()->GravityScale = 1000.0f;
-}
-
-void AJH302Character::DecreasePlayerGravity()
-{
-	GetCharacterMovement()->GravityScale = 200.0f;
-}
-
+//Ability 2 main functionality
 void AJH302Character::GroundPound()
 {
 	F_SpawnSphere();
 	groundPoundSphere->GetOverlappingActors(enemiesInGroundPoundOverlapEvent);
+	if(b_isGroundPounding)
+	{
+		UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), particleGroundPound, GetActorLocation() - FVector(0,0,+80), FRotator::ZeroRotator, true);
+	}
+	
+	
 	for(auto &x:enemiesInGroundPoundOverlapEvent)
 	{
 		UPrimitiveComponent* SM = Cast<UPrimitiveComponent>(x->GetRootComponent());
@@ -267,46 +318,21 @@ void AJH302Character::GroundPound()
 			SM->SetCollisionProfileName("PhysicsActor");
 			SM->SetSimulatePhysics(true);
 			SM->SetGenerateOverlapEvents(true);
-			SM->AddRadialForce(this->GetActorLocation(),80000,300000,ERadialImpulseFalloff::RIF_Linear,true);
-			}
+			SM->AddRadialForce(this->GetActorLocation(),80000,100000,ERadialImpulseFalloff::RIF_Linear,true);
+		}
 		AEnemies* enemy = Cast<AEnemies>(x);
-		enemy->EnemyTakeDamage(70);
+		enemy->EnemyTakeDamage(FMath::Clamp(playerDistanceFromGround/10.0f,1.0f,100.0f));
 	}
 	groundPoundSphere->Destroy();
 	canGroundPound = false;
+	b_isGroundPounding = false;
 }
-
-void AJH302Character::SetleftMouseClickBoolTrue()
-{
-	if(!b_isLeftMouseDown)
-	{
-		b_isLeftMouseDown = true;
-	}
-}
-
-void AJH302Character::SetleftMouseClickBoolFalse()
-{
-	if(b_isLeftMouseDown)
-	{
-		b_isLeftMouseDown = false;
-		mycylinder->SetActorScale3D(FVector(0.2,0.2,5.0f));
-	}
-}
-
-void AJH302Character::ChangeMovementPlus()
-{
-	GetCharacterMovement()->MaxWalkSpeed = 40000.0f;
-}
-
-void AJH302Character::ChangeMovementMinus()
-{
-	GetCharacterMovement()->MaxWalkSpeed = 600.0f;
-}
-
+//Ability 3 main functionality
 void AJH302Character::PlayerCharge()
 {
-		FVector Velocity(FMath::RandRange(GetCharacterMovement()->GetCurrentAcceleration().X/8,GetCharacterMovement()->GetCurrentAcceleration().X/2),FMath::RandRange( GetCharacterMovement()->GetCurrentAcceleration().Y/8,GetCharacterMovement()->GetCurrentAcceleration().Y/2),FMath::RandRange(100.0f,1000.0f));
-		chargeCollisionMesh->GetOverlappingActors(enemiesInChargeOverlap);
+	FVector Velocity(FMath::RandRange(GetCharacterMovement()->GetCurrentAcceleration().X/14,GetCharacterMovement()->GetCurrentAcceleration().X/10),FMath::RandRange( GetCharacterMovement()->GetCurrentAcceleration().Y/14,GetCharacterMovement()->GetCurrentAcceleration().Y/10),FMath::RandRange(300.0f,500.0f));
+	chargeCollisionMesh->GetOverlappingActors(enemiesInChargeOverlap);
+	UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), particleCharge, GetActorLocation() - FVector(200,0,50), FRotator::ZeroRotator, true);
 
 	if(enemiesInChargeOverlap.Num() >= 2)
 	{
@@ -317,7 +343,7 @@ void AJH302Character::PlayerCharge()
 			{
 				SM->SetSimulatePhysics(true);
 				SM->CreatePhysicsState();
-				SM->SetCollisionProfileName("PhysicsActor");
+				SM->SetCollisionProfileName("Enemies");
 				SM->SetSimulatePhysics(true);
 				SM->SetGenerateOverlapEvents(true);
 				SM->AddForce(Velocity);
@@ -326,23 +352,44 @@ void AJH302Character::PlayerCharge()
 				SM->SetPhysicsLinearVelocity(Velocity,false,NAME_None);
 			}
 			AEnemies* enemy = Cast<AEnemies>(x);
-			//enemy->EnemyTakeDamage(15);
+			enemy->EnemyTakeDamage(10);
 		}
 	}
 }
-
+//Bool for ability 1 + left mouse click
+void AJH302Character::SetleftMouseClickBoolTrue()
+{
+	if(!b_isLeftMouseDown)
+	{
+		b_isLeftMouseDown = true;
+	}
+}
+//Bool for ability 1 + left mouse click
+void AJH302Character::SetleftMouseClickBoolFalse()
+{
+	if(b_isLeftMouseDown)
+	{
+		b_isLeftMouseDown = false;
+		mycylinder->SetActorScale3D(FVector(0.2,0.2,5.0f));
+	}
+}
+//changing the bool from true/false for ability 3
 void AJH302Character::CanPlayerCharge()
 {
 	b_isCharging = !b_isCharging;
 }
+//changing the bool from true/false for time dilation
+void AJH302Character::CanChangeGlobalTimeDilation()
+{
+	b_isRightMouseDown = !b_isRightMouseDown;
+}
 
 #pragma endregion 
-#pragma region Base functions
+#pragma region Unreal Base functions
 void AJH302Character::OnResetVR()
 {
 	UHeadMountedDisplayFunctionLibrary::ResetOrientationAndPosition();
 }
-
 
 void AJH302Character::TouchStarted(ETouchIndex::Type FingerIndex, FVector Location)
 {
