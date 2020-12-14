@@ -27,11 +27,7 @@ protected:
 public:	
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
-	
-	UFUNCTION(BlueprintCallable)
-	FVector GetSphereScale();
-	UFUNCTION(BlueprintCallable)
-	void SetSphereScale(float scaleAmount);
+
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	UStaticMeshComponent* staticMeshComponent;

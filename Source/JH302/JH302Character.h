@@ -7,6 +7,7 @@
 #include <Engine/Engine.h>
 #include <Components/StaticMeshComponent.h>
 #include <components/PrimitiveComponent.h>
+#include <Misc/App.h>
 #include "GroundPound.h"
 #include "MyCylinder.h"
 #include "Enemies.h"
@@ -45,11 +46,14 @@ protected:
 	bool b_Ability_1_Pressed = false;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = AbilityBools)
-	bool canGroundPound = false;
+	bool b_CanGroundPound = false;
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = AbilityBools)
     bool b_isLeftMouseDown;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = AbilityBools)
+	bool b_isRightMouseDown = false;
+	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = AbilityBools)
 	bool b_isCharging = false;
 
@@ -57,64 +61,88 @@ protected:
 	bool b_isGroundPounding = false;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = AbilityBools)
-	bool b_isCastingLightning = false;
+	bool b_isCastingFireSpike = false;
 	
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = AbilityBools)
-	bool b_isRightMouseDown = false;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = CoolDownBools)
+	bool b_CanCastAbility1 = true;
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = CoolDownBools)
+	bool b_CanCastAbility2 = true;
+	
 #pragma endregion
 #pragma region project variables
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = LineTrace)
-	float m_targettable_Range = 2000;
+	float targettable_Range = 2000;
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Cylindervariable)
-	float CylinderScale = 0.2;
+	float cylinderScale = 0.2;
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Cylindervariable)
 	float timeScale = 1.0;
+	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = GroundPound)
 	float playerDistanceFromGround;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = CoolDowns)
+	float ability1CoolDown = 0.0f;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = CoolDowns)
+	float ability1MaxCoolDown = 10.0f;
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = CoolDowns)
+	float ability2CoolDown = 0.0f;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = CoolDowns)
+	float ability2MaxCoolDown = 10.0f;
+
 	
 #pragma endregion
 #pragma region project functions
 	UFUNCTION(BlueprintCallable)
-	void LightningBlast();
-	UFUNCTION(BlueprintCallable)
-	void GroundPoundPlayerGravityIncrease();
-	UFUNCTION(BlueprintCallable)
-	void GroundPound();
+	void FireSpikes();
 	UFUNCTION(BlueprintCallable)
 	void SetleftMouseClickBoolTrue();
 	UFUNCTION(BlueprintCallable)
-	void SetleftMouseClickBoolFalse();
+    void SetleftMouseClickBoolFalse();
+	UFUNCTION(BlueprintCallable)
+	void CheckLeftMouseDownAndReScaleCylinder();
+	UFUNCTION(BlueprintCallable)
+	void UpdateCylinderPosition();
+	UFUNCTION(BlueprintCallable)
+    void F_SpawnCylinder();
+	UFUNCTION(BlueprintCallable)
+	void GroundPound();
+	UFUNCTION(BlueprintCallable)
+	void GroundPoundPlayerGravityIncrease();
+	UFUNCTION(BlueprintCallable)
+    void CheckIfCanGroundPoundAndDoIfTrue();
+	UFUNCTION(BlueprintCallable)
+    void F_SpawnSphere();
 	UFUNCTION(BlueprintCallable)
 	void PlayerCharge();
 	UFUNCTION(BlueprintCallable)
 	void CanPlayerCharge();
 	UFUNCTION(BlueprintCallable)
+	void CheckIfChargingAndSetWalkSpeed();
+	UFUNCTION(BlueprintCallable)
 	void CanChangeGlobalTimeDilation();
 	UFUNCTION(BlueprintCallable)
 	void CheckIfRightMouseDownAndTimeDilate();
 	UFUNCTION(BlueprintCallable)
-	void CheckIfChargingAndSetWalkSpeed();
+    void UpdateAbility1CoolDown();
 	UFUNCTION(BlueprintCallable)
-	void CheckLeftMouseDownAndReScaleCylinder();
+	void UpdateAbility2CoolDown();
 	UFUNCTION(BlueprintCallable)
-	void CheckIfCanGroundPoundAndDoIfTrue();
+    void UpdateCoolDowns();
 	UFUNCTION(BlueprintCallable)
-	void UpdateCylinderPosition();
-	UFUNCTION(BlueprintCallable)
-        FVector GetoutHitLineTrace();
-	UFUNCTION(BlueprintCallable)
-        void F_SpawnCylinder();
-	UFUNCTION(BlueprintCallable)
-        void F_SpawnSphere();
+    FVector GetOutHitLineTrace();
+
+
 #pragma endregion
 #pragma region project properties
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Linetrace)
 	FHitResult outHit;
 	
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Cylinder)
-	AMyCylinder* mycylinder;
+	AMyCylinder* myCylinder;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = GroundPound)
 	AGroundPound* groundPoundSphere;
@@ -126,7 +154,7 @@ protected:
 	TArray<AActor*> enemiesInGroundPoundOverlapEvent;
 	
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Enemies)
-	TArray<AActor*> enemiesInChargeOverlap;
+	TArray<AActor*> enemiesInChargeOverlapEvent;
 #pragma endregion 
 #pragma region Base functions
 	/** Resets HMD orientation in VR. */
@@ -186,4 +214,9 @@ public:
 	TSubclassOf<class UParticleSystem> Particle;
 #pragma endregion 
 };
+
+
+
+
+
 

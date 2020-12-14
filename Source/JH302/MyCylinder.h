@@ -24,13 +24,8 @@ protected:
 	FVector scale;
 
 public:	
-	// Called every frame
+	// Called every frameMy
 	virtual void Tick(float DeltaTime) override;
-
-	UFUNCTION(BlueprintCallable)
-	FVector GetCylinderScale();
-	UFUNCTION(BlueprintCallable)
-	void SetCylinderScale(FVector scaleAmount);
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	UStaticMeshComponent* staticMeshComponent;

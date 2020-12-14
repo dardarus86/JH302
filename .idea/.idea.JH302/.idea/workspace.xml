@@ -7,15 +7,14 @@
   <component name="ChangeListManager">
     <list default="true" id="a0f6d7f7-fedb-42a7-a6f3-95420f2f21cf" name="Default Changelist" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/.idea.JH302/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/.idea.JH302/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Config/DefaultEngine.ini" beforeDir="false" afterPath="$PROJECT_DIR$/Config/DefaultEngine.ini" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Content/Blueprints/Enemies.uasset" beforeDir="false" afterPath="$PROJECT_DIR$/Content/Blueprints/Enemies.uasset" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Content/ThirdPersonCPP/Blueprints/ThirdPersonCharacter.uasset" beforeDir="false" afterPath="$PROJECT_DIR$/Content/ThirdPersonCPP/Blueprints/ThirdPersonCharacter.uasset" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Content/ThirdPersonCPP/Maps/ThirdPersonExampleMap.umap" beforeDir="false" afterPath="$PROJECT_DIR$/Content/ThirdPersonCPP/Maps/ThirdPersonExampleMap.umap" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Source/JH302/Enemies.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Source/JH302/Enemies.cpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Source/JH302/Enemies.h" beforeDir="false" afterPath="$PROJECT_DIR$/Source/JH302/Enemies.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Source/JH302/GroundPound.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Source/JH302/GroundPound.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Source/JH302/GroundPound.h" beforeDir="false" afterPath="$PROJECT_DIR$/Source/JH302/GroundPound.h" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Source/JH302/JH302Character.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Source/JH302/JH302Character.cpp" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Source/JH302/JH302Character.h" beforeDir="false" afterPath="$PROJECT_DIR$/Source/JH302/JH302Character.h" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Source/JH302/MyCylinder.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Source/JH302/MyCylinder.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Source/JH302/MyCylinder.h" beforeDir="false" afterPath="$PROJECT_DIR$/Source/JH302/MyCylinder.h" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -41,13 +40,13 @@
   </component>
   <component name="IdeDocumentHistory">
     <changedPaths>
-      <option value="$PROJECT_DIR$/Source/JH302/GroundPound.h" />
-      <option value="$PROJECT_DIR$/Source/JH302/GroundPound.cpp" />
-      <option value="$PROJECT_DIR$/Source/JH302/MyCylinder.h" />
-      <option value="$PROJECT_DIR$/Source/JH302/MyCylinder.cpp" />
       <option value="$PROJECT_DIR$/Source/JH302/Enemies.h" />
       <option value="$PROJECT_DIR$/Source/JH302/Enemies.cpp" />
       <option value="$PROJECT_DIR$/Source/JH302/JH302Character.h" />
+      <option value="$PROJECT_DIR$/Source/JH302/MyCylinder.h" />
+      <option value="$PROJECT_DIR$/Source/JH302/MyCylinder.cpp" />
+      <option value="$PROJECT_DIR$/Source/JH302/GroundPound.h" />
+      <option value="$PROJECT_DIR$/Source/JH302/GroundPound.cpp" />
       <option value="$PROJECT_DIR$/Source/JH302/JH302Character.cpp" />
     </changedPaths>
   </component>
@@ -57,7 +56,7 @@
     <option name="showLibraryContents" value="true" />
   </component>
   <component name="PropertiesComponent">
-    <property name="DebuggerViewTab_PTCS_FirstProportionKey" value="0.38357094" />
+    <property name="DebuggerViewTab_PTCS_FirstProportionKey" value="0.38409245" />
     <property name="DebuggerViewTab_PTCS_LastProportionKey" value="0.0" />
     <property name="RunOnceActivity.OpenProjectViewOnStart" value="true" />
     <property name="RunOnceActivity.ShowReadmeOnStart" value="true" />
@@ -293,7 +292,7 @@
       <workItem from="1607787898407" duration="16699000" />
       <workItem from="1607808973083" duration="18596000" />
       <workItem from="1607866269056" duration="1540000" />
-      <workItem from="1607869671256" duration="2321000" />
+      <workItem from="1607869671256" duration="18379000" />
     </task>
     <servers />
   </component>
@@ -306,9 +305,19 @@
     <breakpoint-manager>
       <breakpoints>
         <line-breakpoint enabled="true" type="com.jetbrains.cidr.execution.debugger.OCBreakpointType">
+          <url>file://$PROJECT_DIR$/Source/JH302/JH302Character.cpp</url>
+          <line>129</line>
+          <option name="timeStamp" value="4" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="com.jetbrains.cidr.execution.debugger.OCBreakpointType">
           <url>file://$PROJECT_DIR$/Source/JH302/JH302Character.h</url>
-          <line>111</line>
-          <option name="timeStamp" value="1" />
+          <line>30</line>
+          <option name="timeStamp" value="7" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="com.jetbrains.cidr.execution.debugger.OCBreakpointType">
+          <url>file://$PROJECT_DIR$/Source/JH302/JH302Character.h</url>
+          <line>19</line>
+          <option name="timeStamp" value="8" />
         </line-breakpoint>
       </breakpoints>
     </breakpoint-manager>

@@ -39,12 +39,3 @@ void AGroundPound::Tick(float DeltaTime)
 
 }
 
-FVector AGroundPound::GetSphereScale()
-{
-	return scale;
-}
-void AGroundPound::SetSphereScale(float scaleAmount)
-{
-	scale = FVector(scaleAmount);
-}
-

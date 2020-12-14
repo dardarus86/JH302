@@ -40,12 +40,4 @@ void AMyCylinder::Tick(float DeltaTime)
 
 }
 
-FVector AMyCylinder::GetCylinderScale()
-{
-	return scale;
-}
-void AMyCylinder::SetCylinderScale(FVector scaleAmount)
-{
-	scale = FVector(scaleAmount.X,scaleAmount.Y,scaleAmount.Z);
-}
 

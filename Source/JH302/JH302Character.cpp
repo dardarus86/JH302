@@ -79,7 +79,7 @@ void AJH302Character::SetupPlayerInputComponent(class UInputComponent* PlayerInp
 	PlayerInputComponent->BindAction("Ability1", IE_Released, this, &AJH302Character::F_SpawnCylinder);
 	PlayerInputComponent->BindAction("Ability2", IE_Released, this, &AJH302Character::GroundPoundPlayerGravityIncrease);
 	PlayerInputComponent->BindAction("Ability3", IE_Pressed, this, &AJH302Character::CanPlayerCharge);
-	PlayerInputComponent->BindAction("LeftClick", IE_Released, this, &AJH302Character::LightningBlast);
+	PlayerInputComponent->BindAction("LeftClick", IE_Released, this, &AJH302Character::FireSpikes);
 	PlayerInputComponent->BindAction("LeftClick", IE_Pressed, this, &AJH302Character::SetleftMouseClickBoolTrue);
 	PlayerInputComponent->BindAction("LeftClick", IE_Released, this, &AJH302Character::SetleftMouseClickBoolFalse);
 	PlayerInputComponent->BindAction("RightClick", IE_Pressed, this, &AJH302Character::CanChangeGlobalTimeDilation);
@@ -108,7 +108,7 @@ void AJH302Character::CheckIfRightMouseDownAndTimeDilate()
 {
 	if(b_isRightMouseDown)
 	{
-		timeScale = timeScale -0.02;
+		timeScale = timeScale -0.20 * FApp::GetDeltaTime();
 		if(timeScale<= 0.2)
 		{
 			timeScale = 0.2;
@@ -118,7 +118,7 @@ void AJH302Character::CheckIfRightMouseDownAndTimeDilate()
 
 	if(!b_isRightMouseDown)
 	{
-		timeScale = timeScale + 0.02;
+		timeScale = timeScale + 0.60* FApp::GetDeltaTime();
 		if(timeScale >= 1.0)
 		{
 			timeScale = 1.0;
@@ -147,20 +147,20 @@ void AJH302Character::CheckLeftMouseDownAndReScaleCylinder()
 {
 	if(b_isLeftMouseDown)
 	{
-		b_isCastingLightning = true;
-		if(CylinderScale >= 7.0f)
+		b_isCastingFireSpike = true;
+		if(cylinderScale >= 7.0f)
 		{
-			CylinderScale = 7.0f;
+			cylinderScale = 7.0f;
 		}
 		else
 		{
-			CylinderScale = CylinderScale + 0.04f;
+			cylinderScale = cylinderScale + 1.2f* FApp::GetDeltaTime();
 		}
-		mycylinder->SetActorScale3D(FVector(CylinderScale,CylinderScale,5.0f));
+		myCylinder->SetActorScale3D(FVector(cylinderScale,cylinderScale,5.0f));
 	}
 	else
 	{
-		CylinderScale = 0.2f;
+		cylinderScale = 0.2f;
 	}
 }
 
@@ -174,10 +174,10 @@ void AJH302Character::CheckIfCanGroundPoundAndDoIfTrue()
 	else //if not on ground then you CAN ground pound
 	{
 
-		canGroundPound = true;
+		b_CanGroundPound = true;
 	}
 
-	if(canGroundPound && GetCharacterMovement()->IsMovingOnGround())
+	if(b_CanGroundPound && b_isGroundPounding && GetCharacterMovement()->IsMovingOnGround())
 	{
 		GroundPound();
 	}
@@ -188,19 +188,28 @@ void AJH302Character::UpdateCylinderPosition()
 	if (b_Ability_1_Pressed)
 	{
 		FVector startPoint = FollowCamera->GetComponentLocation();
-		FVector EndPoint = (FollowCamera->GetForwardVector() * m_targettable_Range) + startPoint;
+		FVector EndPoint = (FollowCamera->GetForwardVector() * targettable_Range) + startPoint;
 
 		FCollisionQueryParams Parameters;
 		GetWorld()->LineTraceSingleByChannel(outHit, startPoint, EndPoint, ECC_Visibility, Parameters);
-		mycylinder->SetActorRelativeLocation(outHit.Location);
+		myCylinder->SetActorRelativeLocation(outHit.Location);
 
 	}
 }
+
+void AJH302Character::UpdateCoolDowns()
+{
+	UpdateAbility1CoolDown();
+	UpdateAbility2CoolDown();
+}
+
 #pragma endregion 
 
 void AJH302Character::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
+
+	UpdateCoolDowns();
 
 	UpdateCylinderPosition();
 
@@ -214,10 +223,10 @@ void AJH302Character::Tick(float DeltaTime)
 }
 
 #pragma region Player made functions
-FVector AJH302Character::GetoutHitLineTrace()
+FVector AJH302Character::GetOutHitLineTrace()
 {
 	FVector startPoint = FollowCamera->GetComponentLocation();
-	FVector EndPoint = (FollowCamera->GetForwardVector() * m_targettable_Range) + startPoint;
+	FVector EndPoint = (FollowCamera->GetForwardVector() * targettable_Range) + startPoint;
 
 	FCollisionQueryParams Parameters;
 	GetWorld()->LineTraceSingleByChannel(outHit, startPoint, EndPoint, ECC_Visibility, Parameters);
@@ -228,19 +237,25 @@ FVector AJH302Character::GetoutHitLineTrace()
 //Ability 1 initial function
 void AJH302Character::F_SpawnCylinder()
 {
-	b_Ability_1_Pressed = true;
+	if(b_CanCastAbility1)
+	{
+		b_Ability_1_Pressed = true;
 
-	FRotator spawnRotation(0.0f, 0.0f, 0.0f);
-	FActorSpawnParameters SpawnParameters;
-	mycylinder = static_cast<AMyCylinder*>(GetWorld()->SpawnActor<AMyCylinder>(GetoutHitLineTrace(), spawnRotation, SpawnParameters));
+		FRotator spawnRotation(0.0f, 0.0f, 0.0f);
+		FActorSpawnParameters SpawnParameters;
+		myCylinder = static_cast<AMyCylinder*>(GetWorld()->SpawnActor<AMyCylinder>(GetOutHitLineTrace(), spawnRotation, SpawnParameters));
+	}
+
 }
 //gravity set for ability 2
 void AJH302Character::GroundPoundPlayerGravityIncrease()
 {
+	if(b_CanCastAbility2)
+	{
 	b_isGroundPounding = true;
 
 	FVector startPoint = GetActorLocation();
-	FVector EndPoint = (GetActorLocation().DownVector * m_targettable_Range) + startPoint;
+	FVector EndPoint = (GetActorLocation().DownVector * targettable_Range) + startPoint;
 
 	FCollisionQueryParams Parameters;
 	GetWorld()->LineTraceSingleByChannel(outHit, startPoint, EndPoint, ECC_Visibility, Parameters);
@@ -248,11 +263,11 @@ void AJH302Character::GroundPoundPlayerGravityIncrease()
 	playerDistanceFromGround = GetActorLocation().Z - outHit.Location.Z;
 	
 	GetCharacterMovement()->GravityScale = 1000.0f;
+	}
 }
 //used in GroundPound()
 void AJH302Character::F_SpawnSphere()
 {
-	FVector DefaultLocation = FVector(-50.0, 850.0, 350.0);
 	FVector offset = FVector(0, 0, 300);
 	FRotator spawnRotation(0.0f, 0.0f, 0.0f);
 	FActorSpawnParameters SpawnParameters;
@@ -261,82 +276,94 @@ void AJH302Character::F_SpawnSphere()
 
 }
 //Ability 1 main functionality
-void AJH302Character::LightningBlast()
+void AJH302Character::FireSpikes()
 {
-	FVector Velocity(FMath::RandRange(-10.0f * CylinderScale,10.0f* CylinderScale),FMath::RandRange(-10.0f * CylinderScale,10.0f* CylinderScale),FMath::RandRange(60.0f * CylinderScale,400.0f* CylinderScale));
-	b_Ability_1_Pressed = false;
-
-	mycylinder->GetOverlappingActors(enemiesInOverlapEvent);
-	if(b_isCastingLightning && !b_Ability_1_Pressed)
+	if(b_CanCastAbility1)
 	{
-		UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), particleCylinder, GetoutHitLineTrace() -FVector(0,0,+20), FRotator::ZeroRotator, true);
-	}
+			
+		
+		FVector Velocity(FMath::RandRange(-30.0f * cylinderScale,30.0f* cylinderScale),FMath::RandRange(-30.0f * cylinderScale,30.0f* cylinderScale),FMath::RandRange(80.0f * cylinderScale,500.0f* cylinderScale));
+		b_Ability_1_Pressed = false;
 	
-	for(auto &x:enemiesInOverlapEvent)
-	{
-	
-		UPrimitiveComponent* PC = Cast<UPrimitiveComponent>(x->GetRootComponent());
-
-		if(PC)
+		myCylinder->GetOverlappingActors(enemiesInOverlapEvent);
+		if(b_isCastingFireSpike && !b_Ability_1_Pressed)
 		{
-				PC->SetSimulatePhysics(true);
-				PC->CreatePhysicsState();
-				PC->SetCollisionProfileName("PhysicsActor");
-				PC->SetSimulatePhysics(true);
-				PC->SetGenerateOverlapEvents(true);
-				PC->AddForce(Velocity);
-				PC->AddImpulseAtLocation(Velocity,PC->GetComponentLocation(),NAME_All);
-				PC->AddImpulse(Velocity*PC->GetMass());
-				PC->SetPhysicsLinearVelocity(Velocity,false,NAME_None);
+			UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), particleCylinder, GetOutHitLineTrace() -FVector(0,0,+20), FRotator::ZeroRotator, true);
 		}
-		AEnemies* enemy = Cast<AEnemies>(x);
-		enemy->EnemyTakeDamage(15*CylinderScale);
-
+		
+		for(auto &x:enemiesInOverlapEvent)
+		{
+		
+			UPrimitiveComponent* PC = Cast<UPrimitiveComponent>(x->GetRootComponent());
+	
+			if(PC)
+			{
+					PC->SetSimulatePhysics(true);
+					PC->CreatePhysicsState();
+					PC->SetCollisionProfileName("PhysicsActor");
+					PC->SetSimulatePhysics(true);
+					PC->SetGenerateOverlapEvents(true);
+					PC->AddForce(Velocity);
+					PC->AddImpulseAtLocation(Velocity,PC->GetComponentLocation(),NAME_All);
+					PC->AddImpulse(Velocity*PC->GetMass());
+					PC->SetPhysicsLinearVelocity(Velocity,false,NAME_None);
+			}
+			AEnemies* enemy = Cast<AEnemies>(x);
+			enemy->EnemyTakeDamage(15*cylinderScale);
+			
+	
+		}
+		myCylinder->Destroy();
+		b_isCastingFireSpike = false;
+		ability1CoolDown = ability1MaxCoolDown;
 	}
-	mycylinder->Destroy();
-	b_isCastingLightning = false;
 }
 //Ability 2 main functionality
 void AJH302Character::GroundPound()
 {
-	F_SpawnSphere();
-	groundPoundSphere->GetOverlappingActors(enemiesInGroundPoundOverlapEvent);
-	if(b_isGroundPounding)
+	if(b_CanCastAbility2)
 	{
-		UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), particleGroundPound, GetActorLocation() - FVector(0,0,+80), FRotator::ZeroRotator, true);
-	}
-	
-	
-	for(auto &x:enemiesInGroundPoundOverlapEvent)
-	{
-		UPrimitiveComponent* SM = Cast<UPrimitiveComponent>(x->GetRootComponent());
-		
-		if(SM)
+		F_SpawnSphere();
+		groundPoundSphere->GetOverlappingActors(enemiesInGroundPoundOverlapEvent);
+		if(b_isGroundPounding)
 		{
-			SM->SetSimulatePhysics(true);
-			SM->CreatePhysicsState();
-			SM->SetCollisionProfileName("PhysicsActor");
-			SM->SetSimulatePhysics(true);
-			SM->SetGenerateOverlapEvents(true);
-			SM->AddRadialForce(this->GetActorLocation(),80000,100000,ERadialImpulseFalloff::RIF_Linear,true);
+			UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), particleGroundPound, GetActorLocation() - FVector(0,0,+80), FRotator::ZeroRotator, true);
 		}
-		AEnemies* enemy = Cast<AEnemies>(x);
-		enemy->EnemyTakeDamage(FMath::Clamp(playerDistanceFromGround/10.0f,1.0f,100.0f));
+	
+	
+		for(auto &x:enemiesInGroundPoundOverlapEvent)
+		{
+			UPrimitiveComponent* SM = Cast<UPrimitiveComponent>(x->GetRootComponent());
+		
+			if(SM)
+			{
+				SM->SetSimulatePhysics(true);
+				SM->CreatePhysicsState();
+				SM->SetCollisionProfileName("PhysicsActor");
+				SM->SetSimulatePhysics(true);
+				SM->SetGenerateOverlapEvents(true);
+				SM->AddRadialForce(this->GetActorLocation(),80000,100000,ERadialImpulseFalloff::RIF_Linear,true);
+			}
+			AEnemies* enemy = Cast<AEnemies>(x);
+			enemy->EnemyTakeDamage(FMath::Clamp(playerDistanceFromGround/10.0f,1.0f,100.0f));
+			
+		}
+		groundPoundSphere->Destroy();
+		b_CanGroundPound = false;
+		b_isGroundPounding = false;
+		ability2CoolDown = ability2MaxCoolDown;
 	}
-	groundPoundSphere->Destroy();
-	canGroundPound = false;
-	b_isGroundPounding = false;
 }
 //Ability 3 main functionality
 void AJH302Character::PlayerCharge()
 {
 	FVector Velocity(FMath::RandRange(GetCharacterMovement()->GetCurrentAcceleration().X/14,GetCharacterMovement()->GetCurrentAcceleration().X/10),FMath::RandRange( GetCharacterMovement()->GetCurrentAcceleration().Y/14,GetCharacterMovement()->GetCurrentAcceleration().Y/10),FMath::RandRange(300.0f,500.0f));
-	chargeCollisionMesh->GetOverlappingActors(enemiesInChargeOverlap);
-	UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), particleCharge, GetActorLocation() - FVector(200,0,50), FRotator::ZeroRotator, true);
+	chargeCollisionMesh->GetOverlappingActors(enemiesInChargeOverlapEvent);
+	UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), particleCharge, GetActorLocation() - FVector(100,0,100), FRotator::ZeroRotator, true);
 
-	if(enemiesInChargeOverlap.Num() >= 2)
+	if(enemiesInChargeOverlapEvent.Num() >= 2)
 	{
-		for(auto &x:enemiesInChargeOverlap)
+		for(auto &x:enemiesInChargeOverlapEvent)
 		{
 			UPrimitiveComponent* SM = Cast<UPrimitiveComponent>(x->GetRootComponent());
 			if(SM)
@@ -370,7 +397,7 @@ void AJH302Character::SetleftMouseClickBoolFalse()
 	if(b_isLeftMouseDown)
 	{
 		b_isLeftMouseDown = false;
-		mycylinder->SetActorScale3D(FVector(0.2,0.2,5.0f));
+		myCylinder->SetActorScale3D(FVector(0.2,0.2,5.0f));
 	}
 }
 //changing the bool from true/false for ability 3
@@ -383,6 +410,34 @@ void AJH302Character::CanChangeGlobalTimeDilation()
 {
 	b_isRightMouseDown = !b_isRightMouseDown;
 }
+
+void AJH302Character::UpdateAbility1CoolDown()
+{
+	if(ability1CoolDown >= 0)
+	{
+		b_CanCastAbility1 = false;
+		ability1CoolDown -= 2.0* FApp::GetDeltaTime();
+	}
+	else
+	{
+		b_CanCastAbility1 = true;
+	}
+}
+
+void AJH302Character::UpdateAbility2CoolDown()
+{
+	if(ability2CoolDown >= 0)
+	{
+		b_CanCastAbility2 = false;
+		ability2CoolDown -= 2.0* FApp::GetDeltaTime();
+	}
+	else
+	{
+		b_CanCastAbility2 = true;
+	}
+}
+
+
 
 #pragma endregion 
 #pragma region Unreal Base functions
